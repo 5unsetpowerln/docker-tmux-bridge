@@ -8,7 +8,6 @@ use axum::routing::post;
 use axum::{Json, Router};
 use clap::Parser;
 use clap::ValueEnum;
-use daemonize::Daemonize;
 use serde::{Deserialize, Serialize};
 use tokio::process::Command;
 
@@ -22,37 +21,9 @@ pub const DEFAULT_PORT: u16 = 3000;
 pub struct Args {
     enter_command: Option<String>,
     port: Option<u16>,
-    /// Launch server as daemon.
-    /// Note that only requests from containers which know tmux socket number internally can be processed by daemonized server.
-    /// The client fetches tmux socket information from $TMUX_SOCKET environment variable.
-    /// So please copy $TMUX which is a host's environment variable to $TMUX_SOCKET which is a guest's environment variable.
-    #[arg(short, long)]
-    daemon: bool,
 }
 
 pub async fn run(args: Args) {
-    if args.daemon {
-        let stdout = std::fs::File::create("/tmp/daemon.out").unwrap();
-        let stderr = std::fs::File::create("/tmp/daemon.err").unwrap();
-
-        let daemonize = Daemonize::new()
-            .pid_file("/tmp/test.pid") // Every method except `new` and `start`
-            .chown_pid_file(true) // is optional, see `Daemonize` documentation
-            .working_directory("/tmp") // for default behaviour.
-            .user("nobody")
-            .group("daemon") // Group name
-            .group(2) // or group id.
-            .umask(0o777) // Set umask, `0o027` by default.
-            .stdout(stdout) // Redirect stdout to `/tmp/daemon.out`.
-            .stderr(stderr) // Redirect stderr to `/tmp/daemon.err`.
-            .privileged_action(|| "Executed before drop privileges");
-
-        match daemonize.start() {
-            Ok(_) => println!("Success, daemonized"),
-            Err(e) => eprintln!("Error, {e}"),
-        }
-    }
-
     if let Some(enter_command) = args.enter_command {
         ENTER_COMMAND_RAW.set(enter_command).unwrap();
     }
