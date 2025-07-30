@@ -1,0 +1,19 @@
+[package]
+name = "docker-tmux-bridge"
+version = "0.1.0"
+edition = "2024"
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = 'abort'
+strip = true
+
+[dependencies]
+axum = "0.8.4"
+clap = { version = "4.5.42", features = ["derive"] }
+reqwest = { version = "0.12.22", features = ["json"], default-features = false }
+serde = { version = "1.0.219", features = ["derive"] }
+shlex = "1.3.0"
+tokio = { version = "1.47.0", features = ["full"] }
