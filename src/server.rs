@@ -34,7 +34,7 @@ pub async fn run(args: Args) {
         port = specified_port;
     }
 
-    let app = Router::new().route("/", post(execute_command));
+    let app = Router::new().route("/execute", post(execute_command));
 
     let addr = SocketAddr::from((DEFAULT_IP, port));
     println!("Listening on {addr}");
@@ -116,6 +116,8 @@ async fn execute_command(Json(request): Json<Request>) -> impl IntoResponse {
 
     command.args(enter_command).args(inner_command);
 
+    println!("command {command:?}");
+
     match command.output().await {
         Ok(output) => {
             let stdout = unsafe { String::from_utf8_unchecked(output.stdout) };
@@ -175,6 +177,6 @@ async fn construct_enter_command(container_id: Option<String>) -> Result<Vec<Str
         "-it".to_string(),
         container_id,
         "/bin/bash".to_string(),
-        "-C".to_string(),
+        "-c".to_string(),
     ])
 }

@@ -35,7 +35,7 @@ pub async fn run(args: Args) {
     let container_id = get_container_id()
         .await
         .expect("Failed to get the container id.");
-    let url = format!("http://{ip}:{port}/");
+    let url = format!("http://{ip}:{port}/execute");
     let request = server::Request::new(args.tmux_action, args.command, container_id);
 
     println!("Request: {request:?}");
